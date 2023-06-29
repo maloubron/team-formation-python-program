@@ -1,0 +1,57 @@
+README team_form1.py 29-06-2023
+
+This program has been made by Malou Bron for the master thesis of Human Computer Interaction in collaboration with the IT consultancy company Bizzomate.
+This program takes the results of the Drivers test data (and other data which is dummy data so far), calculates the possible team combinations, assigns values based on collaboration compatibilty on each team and return the teams in ranked order.
+I will now explain the program step by step.
+
+
+1. Initiating Tkinter interface
+Program starts at line 487 with the initiation of a Tkinter interface.
+Several input fields are created in the interface.
+As of now, only teams or 2,3 or 4 consultants can be created. Larger teams will require longer running time.
+As of now, only 5 skills with 5 levels are availble to specify. 
+To exclude consultants, enter the names seperated with comma's without withe space between the comma's.
+
+2. check_team_size
+The function check_team_size gets called after the 'berekenen' button is clicked.
+This function checks the user input data for how many consultants the team requires and based on this information calls the next function and gives combi1, combi2, or combi3 with it. (combi1 is all the possible team combinations when the team consists of 2 consultants, combi2 is the same but then with 3 consultants etc.)
+
+3. filtered teams 
+The check_skillsMJ functions loops through the list with all possible teams (combi1, combi2 or combi3), and filteres out the teams that do not have one color in the expression with score 15 or higher in common. When a person scores 15 or higher in the expression graph of the Drivers test, this means this person can effectively communicate on that color. We only want to have teams left, in which all participants can communicate on at least one communual color. Also, teams that do not adhere to the skill and junior/medior requirements are filtered out here. 
+
+4. Color coverage & team friction
+The filtered teams are input to the color coverage and team friction functions. At the bottom of this file is an extensive explanation for how the color coverage and friction get calculated. Important to remember is that we want to have teams (1) were all team members have at least one color in their expression with score 15 or higher, (2) have a high total color coverage (3) have low friction.
+
+5. Calculate final result
+The final result gets calculated by doing: t-score color coverage - t-score friction. We opt for the t-scores because this way we can compare the two numbers with each other. It is easier to get a high color coverage score than it is to get a high friction and therefore just normalizing the scores is not sufficient. Keep in mind that becasue t-scores are relative to the sample pool, each time you run the program with a different ocnsultant pool, the t-scores may differ even though some teams are the same. calculate_sample_std_dev function calculates the t-scores for both friction and color coverage.
+
+6. show results
+the show_results function together with the ordered_results function will show all the teams in right order. Each time the program is re-run the table gets cleaned and overridden.
+
+
+
+
+
+show_results
+
+
+
+
+Friction:
+-	A friction table is created for all the pairs of consultants. 
+-	Each pair gets a friction number that is calculated as follows: you look at all the colors that have score 15 or higher on the expression graph of person 1. You look at all the colors that have score -15 or lower on the expression graph of person 2. For each color that has overlap (person1 has an expression of 15 or higher AND person2 had a resistance of -15 or lower) you count 1 point. 
+-	If there is a so-called super friction (person 1 has an expression of 30 or higher AND person 2 had a resistance of -20 or lower) we will count 1.5 instead of 1. This is a bonus. This situation won’t occur that often, but we want to penalize this situation. 
+-	You do this both ways.
+-	When both person A and person B score 25 or higher on a color. 1 point will be subtracted from the final friction, since these 2 people communicate very well on that color we want their friction to be lower. 
+-	The max number of frictions per pair would be a maximum of 14. This will probably not be the case since in this situation person 1 and 2 must score on ALL colors 15 or higher in the expression graph AND -15 or lower in the resistance graph.
+-	Finally we check if the friction is a negative number. This might happen when 2 people do not have much friction, and they might score 25 or higher on (some) colors. In this case we set friction to 0 because we do not want this to be a negative number. 
+-	We will normalize the friction number by attaining the t-score. This way we can easily compare the friction number and the color coverage to each other. 
+
+
+Color coverage:
+-	We want besides a team that has at least one color in common they can communicate on, to have teams that have as many different colors as possible.
+-	We will count a color as present when a person has an expression of this color of 15 or higher. 
+-	To make a distinction between teams where for example 3 people have the color yellow versus a team where only one person has the color yellow we came up with the following calculation:
+-	The first color that gets counted, adds 1 to the color_coverage number. If a second person in the team also has that color, 0.5 gets added. For the third person, 0.25 gets added and so forth.
+-	So the maximum color coverage in a team of 3 people is: (7 + 3.5 + 1.75).
+-	We normalize again the color coverage number by attainting the t-score. This way we can compare the friction to the color coverage number. Since a higher number on color coverage is more easily attained than a higher number on friction, normalizing the numbers by dividing them to their maximum possible score is not enough. 
